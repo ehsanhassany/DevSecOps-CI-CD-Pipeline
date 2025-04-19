@@ -1,5 +1,5 @@
 # Stage 1: Build the WAR file
-FROM maven:3.6.3-jdk-17 AS builder
+FROM maven:3.8.6-jdk-17 AS builder
 WORKDIR /build
 COPY . .
 RUN mvn clean package
