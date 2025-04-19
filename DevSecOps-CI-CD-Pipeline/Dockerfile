@@ -2,10 +2,10 @@
 FROM maven:3.8.6-eclipse-temurin-17 AS builder
 WORKDIR /build
 COPY . .
-RUN mvn clean package
+RUN mvn clean package -Dlicense.skip=true
 
 # Stage 2: Create the Tomcat image
-FROM tomcat:9.0-jdk21-temurin
+FROM tomcat:9.0-jdk17
 # Clean default webapps
 RUN rm -rf /usr/local/tomcat/webapps/*
 # Copy WAR from builder stage
