@@ -14,8 +14,23 @@
 #    limitations under the License.
 #
 
-FROM openjdk:21
-COPY . /usr/src/myapp
-WORKDIR /usr/src/myapp
-RUN ./mvnw clean package
-CMD ./mvnw cargo:run -P tomcat90
+#FROM openjdk:21
+#COPY . /usr/src/myapp
+#WORKDIR /usr/src/myapp
+#RUN ./mvnw clean package
+#CMD ./mvnw cargo:run -P tomcat90
+# ----------- STAGE 1: Build (only used on CI server) -----------
+# ----------- STAGE 2: Runtime (used on any server) -----------
+FROM tomcat:9.0-jdk21-temurin
+
+# Clean default webapps
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+# Copy final WAR from builder stage
+COPY --from=builder /build/target/*.war /usr/local/tomcat/webapps/ROOT.war
+
+# Expose default Tomcat port
+EXPOSE 8080
+
+# Run Tomcat
+CMD ["catalina.sh", "run"]
