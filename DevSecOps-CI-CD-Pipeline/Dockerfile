@@ -1,36 +1,16 @@
-#
-#    Copyright 2010-2023 the original author or authors.
-#
-#    Licensed under the Apache License, Version 2.0 (the "License");
-#    you may not use this file except in compliance with the License.
-#    You may obtain a copy of the License at
-#
-#       https://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    See the License for the specific language governing permissions and
-#    limitations under the License.
-#
+# Stage 1: Build the WAR file
+FROM maven:3.8.6-openjdk-17 AS builder
+WORKDIR /build
+COPY . .
+RUN mvn clean package
 
-#FROM openjdk:21
-#COPY . /usr/src/myapp
-#WORKDIR /usr/src/myapp
-#RUN ./mvnw clean package
-#CMD ./mvnw cargo:run -P tomcat90
-# ----------- STAGE 1: Build (only used on CI server) -----------
-# ----------- STAGE 2: Runtime (used on any server) -----------
+# Stage 2: Create the Tomcat image
 FROM tomcat:9.0-jdk21-temurin
-
 # Clean default webapps
 RUN rm -rf /usr/local/tomcat/webapps/*
-
-# Copy final WAR from builder stage
+# Copy WAR from builder stage
 COPY --from=builder /build/target/*.war /usr/local/tomcat/webapps/ROOT.war
-
 # Expose default Tomcat port
 EXPOSE 8080
-
 # Run Tomcat
 CMD ["catalina.sh", "run"]
